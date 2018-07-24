@@ -1,5 +1,6 @@
 package runner
 
+import model.Plane
 import view.objectViewer.ObjectDetailPane
 import view.{DrawControls, GeoCanvas, GeoObjectBrowser}
 
@@ -23,7 +24,7 @@ object Scalgebra extends JFXApp {
         right = drawControls
         left = new BorderPane {
           top = treeView
-          bottom = new ObjectDetailPane(treeView.selectedObject)
+          bottom = new ObjectDetailPane(Plane.selectedObject)
         }
       }
     }

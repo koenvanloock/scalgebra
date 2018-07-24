@@ -4,10 +4,13 @@ import model.Plane
 import model.geoobjects.{GeoLine, GeoObject, Point}
 import signal.Signal
 
+import scala.util.Try
+import scalafx.scene.control.Button
 import scalafx.scene.layout.VBox
+import scalafx.Includes._
 
 
-class ObjectDetailPane(selectedObject: Signal[GeoObject]) extends VBox {
+class ObjectDetailPane(selectedObject: Signal[Option[GeoObject]]) extends VBox {
 
 
   private val nameField = new LabeledTextInput("Naam")
@@ -19,30 +22,29 @@ class ObjectDetailPane(selectedObject: Signal[GeoObject]) extends VBox {
   private val heightField = new LabeledTextInput("Height")
   children.add(heightField)
 
+  private val button = new Button("save")
+  children.add(button)
+
 
   Signal {
-    nameField.setText(selectedObject().name)
-
     selectedObject() match {
-      case p: Point =>
+      case Some(p: Point) =>
+        nameField.setText(p.name)
         widthField.setText(p.x.toString)
         heightField.setText(p.y.toString)
-      case _ => ()
+      case Some(l: GeoLine) =>
+        nameField.setText(l.name)
+      case _ =>
+
     }
   }
 
-  Signal {
-    selectedObject() match {
-      case p: Point =>
-        Plane.updateObject(p.copy(
-          name = nameField.text(),
-          x = widthField.text().toDouble,
-          y = heightField.text().toDouble))
-      case l: GeoLine =>
-        Plane.updateObject(
-          l.copy(name = nameField.text())
-        )
-    }
-  }
+ button.onMouseClicked = (event) => {
+   Plane.updateActive(
+     nameField.text(),
+     Try(widthField.text().toDouble).toOption.getOrElse(0),
+     Try(heightField.text().toDouble).toOption.getOrElse(0)
+   )
+ }
 
 }

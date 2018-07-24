@@ -8,11 +8,9 @@ import scalafx.scene.control.{TreeItem, TreeView}
 import scalafx.scene.layout.StackPane
 
 class GeoObjectBrowser extends StackPane {
-  val selectedObject = new Var[GeoObject](Point(0,0,"O", "O"))
 
-  private var objectsMap = Map[String, String]()
-  private var points = Set.empty[Point]
-  private var lines = Set.empty[GeoLine]
+  private var points = Set.empty[String]
+  private var lines = Set.empty[String]
 
 
   val root = new TreeItem[String]("objects")
@@ -26,7 +24,7 @@ class GeoObjectBrowser extends StackPane {
   tree.selectionModel().selectedItemProperty().addListener((obs, old, newValue) => {
     val selectedItem = newValue.getValue
     Plane.find(selectedItem) match {
-      case Some(item) => selectedObject.update(item)
+      case Some(item) => Plane.selectedObject.update(Some(item))
       case _ => ()
     }
   })
@@ -47,11 +45,10 @@ class GeoObjectBrowser extends StackPane {
       }
   }
 
-  private def addToCorrectContext[T <: GeoObject](context: Set[T], objectToAdd: T, root: TreeItem[String]): Set[T] = {
-    if (!context.contains(objectToAdd)) {
+  private def addToCorrectContext(context: Set[String], objectToAdd: GeoObject, root: TreeItem[String]): Set[String] = {
+    if (!context.contains(objectToAdd.name)) {
       root.children.add(new TreeItem(objectToAdd.name))
-      objectsMap += (objectToAdd.name -> objectToAdd.id)
-      context + objectToAdd
+      context + objectToAdd.name
     } else context
   }
 

@@ -6,7 +6,7 @@ import signal.Var
 object Plane {
   def find(selectedItem: String): Option[GeoObject] = objects().find(_.name == selectedItem)
 
-
+  val selectedObject = new Var[Option[GeoObject]](None)
   val objects = new Var(Set[GeoObject]())
   val lastPoint = new Var(Point(0, 0, "", ""))
   val drawMode = new Var(DrawModes.POINT)
@@ -50,9 +50,14 @@ object Plane {
     currentCharString
   }
 
-  def updateObject(geoObjectToUpdate: GeoObject) = {
-      val currentObjects = objects()
-      objects.update(currentObjects.filterNot(o => o.id == geoObjectToUpdate.id) + geoObjectToUpdate)
-      println(currentObjects.filterNot(o => o.id == geoObjectToUpdate.id) + geoObjectToUpdate)
+  def updateActive(name: String, x: Double, y: Double): Unit = {
+    selectedObject() match {
+      case Some(selected: GeoObject) =>
+        val obj = objects()
+        val geoObject = selected.update(name, x, y)
+        selectedObject.update(Some(geoObject))
+        objects.update(obj.filterNot(_ == selected) + geoObject)
+      case _ => ()
+    }
   }
 }
