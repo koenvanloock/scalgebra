@@ -1,11 +1,11 @@
 package model
 
 import model.geoobjects.{GeoObject, Point}
-import signal.Var
+import signal.{Signal, Var}
 
 object Plane {
   def find(selectedItem: String): Option[GeoObject] = objects().find(_.name == selectedItem)
-
+  val showGrid = new Var(true)
   val selectedObject = new Var[Option[GeoObject]](None)
   val objects = new Var(Set[GeoObject]())
   val lastPoint = new Var(Point(0, 0, "", ""))
@@ -30,25 +30,9 @@ object Plane {
     objects.update(currentObjects.filterNot(_ == geoObject))
   }
 
-  def pickAndAdvanceCharString(): String = {
-    val currentCharString = nextCharString()
-    if (currentCharString.last < 'Z') {
-      nextCharString.update(currentCharString.init + (currentCharString.last + 1).toChar)
-    } else {
-      nextCharString.update(currentCharString.map(_ => 'A') + 'A')
-    }
-    currentCharString
-  }
+  def pickAndAdvanceCharString(): String = getNextName(nextCharString, 'A', 'Z')
 
-  def pickAndAdvanceLineCharString(): String = {
-    val currentCharString = nextLineString()
-    if (currentCharString.last < 'z') {
-      nextLineString.update(currentCharString.init + (currentCharString.last + 1).toChar)
-    } else {
-      nextLineString.update(currentCharString.map(_ => 'a') + 'a')
-    }
-    currentCharString
-  }
+  def pickAndAdvanceLineCharString(): String = getNextName(nextLineString, 'a', 'z')
 
   def updateActive(name: String, x: Double, y: Double): Unit = {
     selectedObject() match {
@@ -59,5 +43,15 @@ object Plane {
         objects.update(obj.filterNot(_ == selected) + geoObject)
       case _ => ()
     }
+  }
+
+  private def getNextName(signal: Var[String], firstChar: Char, lastChar: Char): String = {
+    val currentLineString = signal()
+    if (currentLineString.last < lastChar) {
+      signal.update(currentLineString.init + (currentLineString.last + 1).toChar)
+    } else {
+      signal.update(currentLineString.map(_ => firstChar) + firstChar)
+    }
+    if(objects().map(_.name).contains(currentLineString)) getNextName(signal, firstChar, lastChar) else currentLineString
   }
 }

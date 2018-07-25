@@ -14,7 +14,11 @@ class DrawControls extends VBox {
   private val lineLink = new Hyperlink("Line")
   lineLink.setOnMouseClicked(event => Plane.drawMode.update(DrawModes.FIRST_OF_STRAIT))
 
+  private val circleCenterRadius = new Hyperlink("Circle")
+  circleCenterRadius.setOnMouseClicked(event => Plane.drawMode.update(DrawModes.CIRCLE_CENTER))
+
   children.add(pointLink)
   children.add(lineLink)
+  children.add(circleCenterRadius)
 
 }

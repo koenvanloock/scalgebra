@@ -13,9 +13,7 @@ class LabeledTextInput(label: String) extends HBox{
 
   val textInput = new TextField()
 
-  textInput.onKeyTyped = _ => {
-      text.update(textInput.text.value)
-  }
+  textInput.text.onChange((obs, oldVal, newVal) => text.update(newVal))
 
   children.add(new Label(label))
   children.add(textInput)
